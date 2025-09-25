@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
+/*
 struct aluno* getAluno(){
     struct aluno* retorno = malloc(sizeof(struct aluno));
     if(!retorno)
@@ -35,6 +36,7 @@ void imprimirDadosAluno(){
 
     return;
 }
+*/
 
 //IMPLEMENTE AS DEMAIS FUNÇÕES AQUI
 
@@ -59,7 +61,7 @@ struct nodo *node_create(int chave)
 void rotation_left(struct nodo **raiz, struct nodo *x)
 {
     struct nodo *sentinela = (*raiz)->parent;
-    struct nodo *y = x;
+    struct nodo *y = x->right;
 
     x->right = y->left;
     if (y->left != sentinela)
@@ -82,7 +84,81 @@ void rotation_left(struct nodo **raiz, struct nodo *x)
 
 void rotation_right(struct nodo **raiz, struct nodo *x)
 {
+    struct nodo *sentinela = (*raiz)->parent;
+    struct nodo *y = x->left;
 
+    x->left = y->right;
+    if (y->right != sentinela)
+        y->right->parent = x;
+
+    y->parent = x->parent;
+    if (x->parent == sentinela)
+        (*raiz) = y;
+    else
+    {
+        if (x == x->parent->right)
+            x->parent->right = y;
+        else
+            x->parent->left = y;
+    }
+
+    y->right = x;
+    x->parent = y;
+}
+
+void imprimirEmOrdem(struct nodo* nodo)
+{
+    if (nodo->chave != LIXO)
+    {
+        imprimirEmOrdem(nodo->left);
+        if (nodo->colour == BLACK)
+        {
+            printf("(B)%d ", nodo->chave);
+            if (nodo->parent->chave == LIXO)
+                printf("[QUALQUER]\n");
+            else if (nodo->parent->left == nodo)
+                printf("[%de]\n", nodo->parent->chave);
+            else
+                printf("[%dd]\n", nodo->parent->chave);
+        }
+        else
+        {
+            printf("(R)%d ", nodo->chave);
+            if (nodo->parent->chave == LIXO)
+                printf("[QUALQUER]\n");
+            else if (nodo->parent->left == nodo)
+                printf("[%de]\n", nodo->parent->chave);
+            else
+                printf("[%dd]\n", nodo->parent->chave);
+        }
+    }
+}
+
+void imprimirEmLargura(struct nodo* raiz)
+{
+
+}
+
+struct nodo *buscar(struct nodo *raiz, int chave)
+{
+    if (raiz == NULL)
+    {
+        printf("ARVORE INEXISTENTE\n");
+        return NULL;
+    }
+
+    if (raiz->chave == chave)
+        return raiz;
+
+    struct nodo *retorno = raiz;
+    retorno = buscar(raiz->left, chave);
+    if (retorno->chave != LIXO)
+        return retorno;
+    retorno = buscar(raiz->right, chave);
+    if (retorno->chave != LIXO)
+        return retorno;
+    
+    return raiz->parent;
 }
 
 void redblack_insert_fixup(struct nodo **raiz, struct nodo *z)
@@ -114,7 +190,26 @@ void redblack_insert_fixup(struct nodo **raiz, struct nodo *z)
         }
         else
         {
-            //ESPELHO
+            struct nodo *y = z->parent->parent->left;
+            if (y->colour == RED)
+            {
+                z->parent->colour = BLACK;
+                y->colour = BLACK;
+                z->parent->parent->colour = RED;
+                z = z->parent->parent;
+            }
+            else
+            {
+                if (z == z->parent->left)
+                {
+                    z = z->parent;
+                    rotation_right(raiz, z);
+                }
+
+                z->parent->colour = BLACK;
+                z->parent->parent->colour = RED;
+                rotation_left(raiz, z->parent->parent);
+            }
         }
     }
 
@@ -140,7 +235,7 @@ struct nodo *inserir(struct nodo **raiz, int chave)
 
     struct nodo *sentinela = (*raiz)->parent;
 
-    if (buscar(raiz, chave) == sentinela)
+    if (buscar((*raiz), chave) == sentinela)
     {
         printf("Falha ao inserir\n");
         return *raiz;
