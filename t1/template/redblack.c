@@ -40,6 +40,8 @@ void imprimirDadosAluno(){
 
 //IMPLEMENTE AS DEMAIS FUNÇÕES AQUI
 
+struct nodo sentinela = {.chave = LIXO, .colour = BLACK, .left = &sentinela, .right = &sentinela, .parent = &sentinela};
+
 struct nodo *node_create(int chave)
 {
     struct nodo *new_node = (struct nodo*)malloc(sizeof(struct nodo));
@@ -51,24 +53,23 @@ struct nodo *node_create(int chave)
 
     new_node->chave = chave;
     new_node->colour = RED;
-    new_node->left = NULL;
-    new_node->right = NULL;
-    new_node->parent = NULL;
+    new_node->left = &sentinela;
+    new_node->right = &sentinela;
+    new_node->parent = &sentinela;
 
     return new_node;
 }
 
 void rotation_left(struct nodo **raiz, struct nodo *x)
 {
-    struct nodo *sentinela = (*raiz)->parent;
     struct nodo *y = x->right;
 
     x->right = y->left;
-    if (y->left != sentinela)
+    if (y->left != &sentinela)
         y->left->parent = x;
 
     y->parent = x->parent;
-    if (x->parent == sentinela)
+    if (x->parent == &sentinela)
         (*raiz) = y;
     else
     {
@@ -84,15 +85,14 @@ void rotation_left(struct nodo **raiz, struct nodo *x)
 
 void rotation_right(struct nodo **raiz, struct nodo *x)
 {
-    struct nodo *sentinela = (*raiz)->parent;
     struct nodo *y = x->left;
 
     x->left = y->right;
-    if (y->right != sentinela)
+    if (y->right != &sentinela)
         y->right->parent = x;
 
     y->parent = x->parent;
-    if (x->parent == sentinela)
+    if (x->parent == &sentinela)
         (*raiz) = y;
     else
     {
@@ -132,6 +132,8 @@ void imprimirEmOrdem(struct nodo* nodo)
                 printf("[%dd]\n", nodo->parent->chave);
         }
     }
+    else
+        return;
 }
 
 void imprimirEmLargura(struct nodo* raiz)
@@ -147,18 +149,19 @@ struct nodo *buscar(struct nodo *raiz, int chave)
         return NULL;
     }
 
-    if (raiz->chave == chave)
-        return raiz;
+    struct nodo *atual = raiz;
 
-    struct nodo *retorno = raiz;
-    retorno = buscar(raiz->left, chave);
-    if (retorno->chave != LIXO)
-        return retorno;
-    retorno = buscar(raiz->right, chave);
-    if (retorno->chave != LIXO)
-        return retorno;
-    
-    return raiz->parent;
+    while (atual != &sentinela)
+    {
+        if (chave == atual->chave)
+            return atual;
+        if (chave < atual->chave)
+            atual = atual->left;
+        else
+            atual = atual->right;
+    }
+
+    return &sentinela;
 }
 
 void redblack_insert_fixup(struct nodo **raiz, struct nodo *z)
@@ -220,32 +223,23 @@ struct nodo *inserir(struct nodo **raiz, int chave)
 {
     if (*raiz == NULL)
     {
-        struct nodo *sentinela = node_create(LIXO);
-        sentinela->colour = BLACK;
-
         struct nodo *new_node = node_create(chave);
         new_node->colour = BLACK;
-        new_node->left = sentinela;
-        new_node->right = sentinela;
-        new_node->parent = sentinela;
+        new_node->parent = &sentinela;
         *raiz = new_node;
+        printf("RAIZ CRIADA\n");
 
         return *raiz;
     }
 
-    struct nodo *sentinela = (*raiz)->parent;
-
-    if (buscar((*raiz), chave) == sentinela)
-    {
-        printf("Falha ao inserir\n");
-        return *raiz;
-    }
+    if (buscar((*raiz), chave) != &sentinela)
+        return &sentinela;
 
     struct nodo *z = node_create(chave);
     struct nodo *x = *raiz;
-    struct nodo *y = sentinela;
+    struct nodo *y = &sentinela;
 
-    while (x != sentinela)
+    while (x != &sentinela)
     {
         y = x;
         if (z->chave < x->chave)
@@ -255,7 +249,7 @@ struct nodo *inserir(struct nodo **raiz, int chave)
     }
 
     z->parent = y;
-    if (y == sentinela)
+    if (y == &sentinela)
         (*raiz) = z;
     else
     {
