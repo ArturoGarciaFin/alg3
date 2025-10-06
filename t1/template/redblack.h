@@ -1,13 +1,15 @@
 #ifndef REDBLACK_H_
 #define REDBLACK_H_
 
+#include <stdbool.h>
+
 #define BLACK 0
 #define RED 1
 #define LIXO -12345
 
 struct nodo {
     int chave;
-    char colour;
+    bool colour;
     struct nodo *left;
     struct nodo *right;
     struct nodo *parent;

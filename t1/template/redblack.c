@@ -106,35 +106,49 @@ void rotation_right(struct nodo **raiz, struct nodo *x)
     x->parent = y;
 }
 
+void transplant(struct nodo **raiz, struct nodo *u, struct nodo *v)
+{
+    if (u->parent == &sentinela)
+        (*raiz) = v;
+    else
+        if (u == u->parent->left)
+            u->parent->left = v;
+        else
+            u->parent->right = v;
+    
+    v->parent = u->parent;
+}
+
+struct nodo *minimum(struct nodo *x)
+{
+    while (x->left != &sentinela)
+        x = x->left;
+
+    return x;
+}
+
 void imprimirEmOrdem(struct nodo* nodo)
 {
-    if (nodo->chave != LIXO)
-    {
-        imprimirEmOrdem(nodo->left);
-        if (nodo->colour == BLACK)
-        {
-            printf("(B)%d ", nodo->chave);
-            if (nodo->parent->chave == LIXO)
-                printf("[QUALQUER]\n");
-            else if (nodo->parent->left == nodo)
-                printf("[%de]\n", nodo->parent->chave);
-            else
-                printf("[%dd]\n", nodo->parent->chave);
-        }
-        else
-        {
-            printf("(R)%d ", nodo->chave);
-            if (nodo->parent->chave == LIXO)
-                printf("[QUALQUER]\n");
-            else if (nodo->parent->left == nodo)
-                printf("[%de]\n", nodo->parent->chave);
-            else
-                printf("[%dd]\n", nodo->parent->chave);
-        }
-    }
-    else
+    if (nodo == &sentinela)
         return;
+
+    imprimirEmOrdem(nodo->left);
+
+    if (nodo->colour == BLACK)
+        printf("(B)%d ", nodo->chave);
+    else
+        printf("(R)%d ", nodo->chave);
+
+    if (nodo->parent == &sentinela)
+        printf("[QUALQUER]\n");
+    else if (nodo->parent->left == nodo)
+        printf("[%de]\n", nodo->parent->chave);
+    else
+        printf("[%dd]\n", nodo->parent->chave);
+
+    imprimirEmOrdem(nodo->right);
 }
+
 
 void imprimirEmLargura(struct nodo* raiz)
 {
@@ -219,6 +233,78 @@ void redblack_insert_fixup(struct nodo **raiz, struct nodo *z)
     (*raiz)->colour = BLACK;
 }
 
+void redblack_delete_fixup(struct nodo **raiz, struct nodo *x)
+{
+    while (x != (*raiz) && x->colour == BLACK)
+    {
+        if (x == x->parent->left)
+        {
+            struct nodo *w = x->parent->right;
+            if (w->colour == RED)
+            {
+                w->colour = BLACK;
+                x->parent->colour = BLACK;
+                rotation_left(raiz, x->parent);
+                w = x->parent->right;
+
+            }
+            if (w->left->colour == BLACK && w->right->colour == BLACK)
+            {
+                w->colour = RED;
+                x = x->parent;
+            }
+            else
+            {
+                if (w->right->colour == BLACK)
+                {
+                    w->left->colour = BLACK;
+                    w->colour = RED;
+                    rotation_right(raiz, w);
+                    w = x->parent->right;
+                }
+                w->colour = x->parent->colour;
+                x->parent->colour = BLACK;
+                w->right->colour = BLACK;
+                rotation_left(raiz, x->parent);
+                x = (*raiz);
+            }
+        }
+        else
+        {
+            struct nodo *w = x->parent->left;
+            if (w->colour == RED)
+            {
+                w->colour = BLACK;
+                x->parent->colour = BLACK;
+                rotation_right(raiz, x->parent);
+                w = x->parent->left;
+
+            }
+            if (w->right->colour == BLACK && w->left->colour == BLACK)
+            {
+                w->colour = RED;
+                x = x->parent;
+            }
+            else
+            {
+                if (w->left->colour == BLACK)
+                {
+                    w->right->colour = BLACK;
+                    w->colour = RED;
+                    rotation_left(raiz, w);
+                    w = x->parent->left;
+                }
+                w->colour = x->parent->colour;
+                x->parent->colour = BLACK;
+                w->left->colour = BLACK;
+                rotation_right(raiz, x->parent);
+                x = (*raiz);
+            }
+        }
+    }
+    x->colour = BLACK;
+}
+
 struct nodo *inserir(struct nodo **raiz, int chave)
 {
     if (*raiz == NULL)
@@ -261,4 +347,51 @@ struct nodo *inserir(struct nodo **raiz, int chave)
 
     redblack_insert_fixup(raiz, z);
     return (*raiz);
+}
+
+int excluir(struct nodo **raiz, int chave)
+{
+    struct nodo *z = buscar((*raiz), chave);
+    if (z == &sentinela)
+        return 0;
+
+    struct nodo *y = z;
+    struct nodo *x;
+    bool original_colour = y->colour;
+
+    if (z->left == &sentinela)
+    {
+        x = z->right;
+        transplant(raiz, z, z->right);
+    }
+    else
+    {
+        if (z->right == &sentinela)
+        {
+            x = z->left;
+            transplant(raiz, z, z->left);
+        }
+        else
+        {
+            y = minimum(z->right);
+            original_colour = y->colour;
+            x = y->right;
+            if (y != z->right)
+            {
+                transplant(raiz, y, y->right);
+                y->right = z->right;
+                y->right->parent = y;
+            }
+            else
+                x->parent = y;
+            transplant(raiz, z, y);
+            y->left = z->left;
+            y->left->parent = y;
+            y->colour = z->colour;
+        }
+    }
+    if (original_colour == BLACK)
+        redblack_delete_fixup(raiz, x);
+    
+    return 1;
 }
