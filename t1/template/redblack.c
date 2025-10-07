@@ -51,7 +51,6 @@ struct queue_node
 struct queue
 {
     struct queue_node *start;
-    struct queue_node *next;
     struct queue_node *end;
 };
 
@@ -80,14 +79,14 @@ void node_destroy(struct nodo *x)
 
 struct queue *queue_create()
 {
-    struct queue *q = (struct queue*)malloc(sizeof(struct queue));
+    struct queue *q = malloc(sizeof(struct queue));
     if (!q)
     {
         fprintf(stderr, "Falha ao alocar memoria\n");
         exit(1);
     }
+
     q->start = NULL;
-    q->next = NULL;
     q->end = NULL;
 
     return q;
@@ -95,30 +94,54 @@ struct queue *queue_create()
 
 void enqueue(struct queue *q, struct nodo *in)
 {
-    if (q->start == NULL)
+    struct queue_node *novo = malloc(sizeof(struct queue_node));
+    if (!novo)
     {
-        q->start->conteudo = in;
-        q->start->next = &sentinela;
-        q->next = NULL;
-        q->end = q->start;
-        return;
+        fprintf(stderr, "Falha ao alocar memoria\n");
+        exit(1);
     }
 
-    if (q->start == q->end)
+    novo->conteudo = in;
+    novo->next = NULL;
+
+    if (q->start == NULL)
     {
-        q->start->next->conteudo = in;
-        
+        q->start = novo;
+        q->end = novo;
+    }
+    else
+    {
+        q->end->next = novo;
+        q->end = novo;
     }
 }
 
 struct nodo *dequeue(struct queue *q)
 {
+    if (q->start == NULL)
+        return NULL;
 
+    struct queue_node *removido = q->start;
+    struct nodo *valor = removido->conteudo;
+
+    q->start = removido->next;
+
+    if (q->start == NULL)
+        q->end = NULL;
+
+    free(removido);
+    return valor;
 }
 
 void queue_destroy(struct queue *q)
 {
-
+    while (q->start != NULL)
+    {
+        struct queue_node *temp = q->start;
+        q->start = q->start->next;
+        free(temp);
+    }
+    free(q);
 }
 
 void rotation_left(struct nodo **raiz, struct nodo *x)
@@ -195,6 +218,7 @@ void imprimirEmOrdem(struct nodo* nodo)
 
     imprimirEmOrdem(nodo->left);
 
+    /*
     if (nodo->colour == BLACK)
         printf("(B)%d ", nodo->chave);
     else
@@ -206,6 +230,9 @@ void imprimirEmOrdem(struct nodo* nodo)
         printf("[%de]\n", nodo->parent->chave);
     else
         printf("[%dd]\n", nodo->parent->chave);
+    */
+
+    printf("%d ", nodo->chave);
 
     imprimirEmOrdem(nodo->right);
 }
@@ -213,7 +240,42 @@ void imprimirEmOrdem(struct nodo* nodo)
 
 void imprimirEmLargura(struct nodo* raiz)
 {
+    if (raiz == &sentinela)
+        return;
+    
     struct queue *q = queue_create();
+    struct nodo *atual = raiz;
+    int i = 0;
+
+    enqueue(q, atual);
+    while (q->start != NULL)
+    {
+        atual = dequeue(q);
+        //printf("%d\n", atual->chave);
+
+        printf("[%d]", i);
+        if (atual->colour == BLACK)
+            printf("(B)");
+        else
+            printf("(R)");
+        printf("%d ", atual->chave);
+        if (atual->parent == &sentinela)
+            printf("[QUALQUER]");
+        else if (atual->parent->left == atual)
+            printf("[%de]   ", atual->parent->chave);
+        else
+            printf("[%dd]   ", atual->parent->chave);
+
+        if (atual->left != &sentinela)
+            enqueue(q, atual->left);
+        if (atual->right != &sentinela)
+            enqueue(q, atual->right);
+        
+        i++;
+        printf("\n");
+    }
+
+    queue_destroy(q);
 }
 
 struct nodo *buscar(struct nodo *raiz, int chave)

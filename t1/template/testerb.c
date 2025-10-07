@@ -47,17 +47,16 @@ int main()
         printf("Chave 99 nao encontrada.\n");
     }
 
-    /*
-    printf("\n--- Testando a funcao imprimirEmLargura ---\n");
-    printf("Funcao imprimirEmLargura nao implementada.\n");
+    fprintf(stderr, "\n--- Testando a funcao imprimirEmLargura ---\n");
     imprimirEmLargura(raiz);
-    */
     
     printf("\n--- Testando a funcao excluir ---\n");
     int excluidos = excluir(&raiz, 20);
     printf("Excluidos: %d\n", excluidos);
     printf("Arvores após a exclusao:\n");
     imprimirEmOrdem(raiz);
+    printf("\n");
+    imprimirEmLargura(raiz);
 
     // Liberar a memória alocada para a árvore (simplesmente para evitar vazamentos, não é o foco do teste)
     // Isso seria um teste mais complexo, não implementado aqui.
