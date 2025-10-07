@@ -42,6 +42,19 @@ void imprimirDadosAluno(){
 
 struct nodo sentinela = {.chave = LIXO, .colour = BLACK, .left = &sentinela, .right = &sentinela, .parent = &sentinela};
 
+struct queue_node
+{
+    struct nodo *conteudo;
+    struct queue_node *next;
+};
+
+struct queue
+{
+    struct queue_node *start;
+    struct queue_node *next;
+    struct queue_node *end;
+};
+
 struct nodo *node_create(int chave)
 {
     struct nodo *new_node = (struct nodo*)malloc(sizeof(struct nodo));
@@ -58,6 +71,54 @@ struct nodo *node_create(int chave)
     new_node->parent = &sentinela;
 
     return new_node;
+}
+
+void node_destroy(struct nodo *x)
+{
+
+}
+
+struct queue *queue_create()
+{
+    struct queue *q = (struct queue*)malloc(sizeof(struct queue));
+    if (!q)
+    {
+        fprintf(stderr, "Falha ao alocar memoria\n");
+        exit(1);
+    }
+    q->start = NULL;
+    q->next = NULL;
+    q->end = NULL;
+
+    return q;
+}
+
+void enqueue(struct queue *q, struct nodo *in)
+{
+    if (q->start == NULL)
+    {
+        q->start->conteudo = in;
+        q->start->next = &sentinela;
+        q->next = NULL;
+        q->end = q->start;
+        return;
+    }
+
+    if (q->start == q->end)
+    {
+        q->start->next->conteudo = in;
+        
+    }
+}
+
+struct nodo *dequeue(struct queue *q)
+{
+
+}
+
+void queue_destroy(struct queue *q)
+{
+
 }
 
 void rotation_left(struct nodo **raiz, struct nodo *x)
@@ -152,7 +213,7 @@ void imprimirEmOrdem(struct nodo* nodo)
 
 void imprimirEmLargura(struct nodo* raiz)
 {
-
+    struct queue *q = queue_create();
 }
 
 struct nodo *buscar(struct nodo *raiz, int chave)
