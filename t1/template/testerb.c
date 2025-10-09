@@ -58,8 +58,7 @@ int main()
     printf("\n");
     imprimirEmLargura(raiz);
 
-    // Liberar a memória alocada para a árvore (simplesmente para evitar vazamentos, não é o foco do teste)
-    // Isso seria um teste mais complexo, não implementado aqui.
+    destruirArvore(raiz);
 
     return 0;
 }

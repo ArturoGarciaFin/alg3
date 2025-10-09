@@ -72,11 +72,6 @@ struct nodo *node_create(int chave)
     return new_node;
 }
 
-void node_destroy(struct nodo *x)
-{
-
-}
-
 struct queue *queue_create()
 {
     struct queue *q = malloc(sizeof(struct queue));
@@ -218,64 +213,9 @@ void imprimirEmOrdem(struct nodo* nodo)
 
     imprimirEmOrdem(nodo->left);
 
-    /*
-    if (nodo->colour == BLACK)
-        printf("(B)%d ", nodo->chave);
-    else
-        printf("(R)%d ", nodo->chave);
-
-    if (nodo->parent == &sentinela)
-        printf("[QUALQUER]\n");
-    else if (nodo->parent->left == nodo)
-        printf("[%de]\n", nodo->parent->chave);
-    else
-        printf("[%dd]\n", nodo->parent->chave);
-    */
-
     printf("%d ", nodo->chave);
 
     imprimirEmOrdem(nodo->right);
-}
-
-
-void imprimirEmLargura(struct nodo* raiz)
-{
-    if (raiz == &sentinela)
-        return;
-    
-    struct queue *q = queue_create();
-    struct nodo *atual = raiz;
-    int i = 0;
-
-    enqueue(q, atual);
-    while (q->start != NULL)
-    {
-        atual = dequeue(q);
-        //printf("%d\n", atual->chave);
-
-        printf("[%d]", i);
-        if (atual->colour == BLACK)
-            printf("(B)");
-        else
-            printf("(R)");
-        printf("%d ", atual->chave);
-        if (atual->parent == &sentinela)
-            printf("[QUALQUER]");
-        else if (atual->parent->left == atual)
-            printf("[%de]   ", atual->parent->chave);
-        else
-            printf("[%dd]   ", atual->parent->chave);
-
-        if (atual->left != &sentinela)
-            enqueue(q, atual->left);
-        if (atual->right != &sentinela)
-            enqueue(q, atual->right);
-        
-        i++;
-        printf("\n");
-    }
-
-    queue_destroy(q);
 }
 
 struct nodo *buscar(struct nodo *raiz, int chave)
@@ -299,6 +239,66 @@ struct nodo *buscar(struct nodo *raiz, int chave)
     }
 
     return &sentinela;
+}
+
+void imprimirEmLargura(struct nodo* raiz)
+{
+    if (raiz == &sentinela)
+        return;
+    
+    struct queue *q = queue_create();
+    struct nodo *atual;
+    int nivel = 0;
+
+    enqueue(q, raiz);
+    int nodos_no_nivel = 1;
+    int prox_nivel = 0;
+
+    printf("[%d] ", nivel);
+
+    while (q->start != NULL)
+    {
+        atual = dequeue(q);
+        nodos_no_nivel--;
+
+        if (atual->colour == BLACK)
+            printf("(B)");
+        else
+            printf("(R)");
+        printf("%d ", atual->chave);
+
+        if (atual->parent == &sentinela)
+            printf("[QUALQUER]");
+        else if (atual->parent->left == atual)
+            printf("[%de]", atual->parent->chave);
+        else
+            printf("[%dd]", atual->parent->chave);
+
+        printf("    ");
+
+        if (atual->left != &sentinela)
+        {
+            enqueue(q, atual->left);
+            prox_nivel++;
+        }
+        if (atual->right != &sentinela)
+        {
+            enqueue(q, atual->right);
+            prox_nivel++;
+        }
+
+        if (nodos_no_nivel == 0 && q->start != NULL)
+        {
+            printf("\n");
+            nivel++;
+            printf("[%d] ", nivel);
+            nodos_no_nivel = prox_nivel;
+            prox_nivel = 0;
+        }
+    }
+
+    printf("\n");
+    queue_destroy(q);
 }
 
 void redblack_insert_fixup(struct nodo **raiz, struct nodo *z)
@@ -515,6 +515,18 @@ int excluir(struct nodo **raiz, int chave)
     }
     if (original_colour == BLACK)
         redblack_delete_fixup(raiz, x);
-    
+
+    free(z);
+        
     return 1;
+}
+
+void destruirArvore(struct nodo *raiz)
+{
+    if (raiz == &sentinela)
+        return;
+
+    destruirArvore(raiz->left);
+    destruirArvore(raiz->right);
+    free(raiz);
 }

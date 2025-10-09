@@ -38,4 +38,6 @@ void imprimirEmOrdem(struct nodo* nodo);
 
 void imprimirEmLargura(struct nodo* raiz);
 
+void destruirArvore(struct nodo *raiz);
+
 #endif//REDBLACK_H
