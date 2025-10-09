@@ -3,12 +3,13 @@
 
 #include "redblack.h"
 
-int main(){
-	//ATENÇÃO, ESSE É APENAS UM EXEMPLO DE IMPLEMENTAÇÃO DO MAIN.
-	//MODIFIQUE DE ACORDO COM SUAS NECESSIDADES E DE ACORDO COM AS ESPECIFICAÇÕES.
+struct nodo SENTINELA = {.chave = LIXO, .colour = BLACK, .left = &SENTINELA, .right = &SENTINELA, .parent = &SENTINELA};
+
+int main()
+{
 	struct nodo* raiz = NULL;
 	
-	imprimirDadosAluno();
+	//imprimirDadosAluno();
 
 	char op;
 	int val;
@@ -17,8 +18,7 @@ int main(){
 		switch (op) {
 			case 'i':
 				scanf("%d", &val);
-				if(!inserir(&raiz, val))
-					fprintf(stderr,"Falha ao inserir.\n");
+				inserir(&raiz, val);
 				break;
 			case 'r':
 				scanf("%d", &val);
@@ -27,15 +27,15 @@ int main(){
 				break;
 			case 'e':
 				imprimirEmOrdem(raiz);
-				puts("\n");
+				printf("\n");
 				break;
 			case 'l':
-				imprimirEmLargura(raiz, true);
+				imprimirEmLargura(raiz);
 				break;
 			case 'b':
 			 	scanf("%d", &val);
 				struct nodo* valB = buscar(raiz, val);
-				if(valB != &SENTINELA)
+				if(valB->chave != LIXO)
 					printf("Encontrado %d\n", valB->chave);
 				else
 					printf("Nao encontrado %d.\n", val);
@@ -45,6 +45,8 @@ int main(){
 		}
 		scanf(" %c", &op);
 	}
+
+	destruirArvore(raiz);
 
 	return 0;
 }

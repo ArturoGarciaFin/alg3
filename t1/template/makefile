@@ -1,5 +1,5 @@
-parametrosCompilacao=-Wall #-Wshadow
-nomePrograma=trab
+parametrosCompilacao=-Wall -Wshadow
+nomePrograma=antesprova2_20235588
 
 all: $(nomePrograma)
 
@@ -9,7 +9,7 @@ $(nomePrograma): main.o redblack.o
 main.o: main.c
 	gcc -c main.c $(parametrosCompilacao)
 
-ordenacao.o: redblack.h redblack.c
+redblack.o: redblack.h redblack.c
 	gcc -c redblack.c $(parametrosCompilacao)
 
 clean:

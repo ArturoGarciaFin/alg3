@@ -436,13 +436,16 @@ struct nodo *inserir(struct nodo **raiz, int chave)
         new_node->colour = BLACK;
         new_node->parent = &sentinela;
         *raiz = new_node;
-        printf("RAIZ CRIADA\n");
+        //printf("RAIZ CRIADA\n");
 
         return *raiz;
     }
 
     if (buscar((*raiz), chave) != &sentinela)
+    {
+        printf("Falha ao inserir\n");
         return &sentinela;
+    }
 
     struct nodo *z = node_create(chave);
     struct nodo *x = *raiz;
